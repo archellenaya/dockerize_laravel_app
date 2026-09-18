@@ -72,7 +72,7 @@ class NewsApiClient
             }
 
             foreach ($response['articles'] as $article) {
-                $normalized = $this->normalizeArticle($article);
+                $normalized = $this->normalizeArticle($article, $request['category'] ?? null);
 
                 if ($normalized === null) {
                     continue;
@@ -228,7 +228,7 @@ class NewsApiClient
      * @param  array<string, mixed>  $article
      * @return array<string, mixed>|null
      */
-    protected function normalizeArticle(array $article): ?array
+    protected function normalizeArticle(array $article, ?string $requestedCategory = null): ?array
     {
         $title = trim((string) ($article['title'] ?? ''));
         $url = trim((string) ($article['url'] ?? ''));
@@ -246,7 +246,9 @@ class NewsApiClient
             'url_to_image' => data_get($article, 'urlToImage', null),
             'published_at' => data_get($article, 'publishedAt', null),
             'content' => data_get($article, 'content', null),
-            'category' => data_get($article, 'category', null),
+            // NewsAPI's response payload does not echo back a category per
+            // article, so fall back to the category that was requested.
+            'category' => data_get($article, 'category', null) ?? $requestedCategory,
         ];
     }
 }

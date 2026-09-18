@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\ArticleImportService;
 use App\Services\NewsApiClient;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -21,7 +22,7 @@ class FetchNewsCommand extends Command
 
     protected $description = 'Fetch recent news articles from configured news sources and categories via NewsAPI';
 
-    public function handle(NewsApiClient $client): int
+    public function handle(NewsApiClient $client, ArticleImportService $importer): int
     {
         try {
             $sources = $this->parseCsvOption('sources');
@@ -74,6 +75,19 @@ class FetchNewsCommand extends Command
                 'sources' => $sources,
                 'categories' => $categories,
             ]);
+
+            $result = $importer->importMany($articles);
+
+            $this->info(sprintf(
+                'Saved %d new article(s), skipped %d duplicate(s), rejected %d invalid record(s).',
+                $result['created'],
+                $result['duplicates'],
+                $result['invalid'],
+            ));
+
+            foreach ($result['errors'] as $error) {
+                $this->warn(sprintf('Rejected %s: %s', $error['url'] ?? 'unknown URL', implode(' ', $error['errors'])));
+            }
 
             return self::SUCCESS;
         } catch (RuntimeException $exception) {
