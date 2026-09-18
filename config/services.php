@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'newsapi' => [
+        'api_key' => env('NEWSAPI_API_KEY'),
+        'base_url' => env('NEWSAPI_BASE_URL', 'https://newsapi.org/v2'),
+        'timeout' => env('NEWSAPI_TIMEOUT', 15),
+        'language' => env('NEWSAPI_LANGUAGE', 'en'),
+    ],
+
 ];
