@@ -6,20 +6,24 @@ namespace App\Providers;
 
 use App\Repositories\Contracts\ArticleRepositoryInterface;
 use App\Repositories\Contracts\BookmarkRepositoryInterface;
+use App\Repositories\Contracts\CategoryFollowRepositoryInterface;
 use App\Repositories\Contracts\CategoryRepositoryInterface;
 use App\Repositories\Contracts\SourceRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\EloquentArticleRepository;
 use App\Repositories\EloquentBookmarkRepository;
+use App\Repositories\EloquentCategoryFollowRepository;
 use App\Repositories\EloquentCategoryRepository;
 use App\Repositories\EloquentSourceRepository;
 use App\Repositories\EloquentUserRepository;
 use App\Services\ArticleImportService;
 use App\Services\ArticleService;
 use App\Services\BookmarkService;
+use App\Services\CategoryFollowService;
 use App\Services\Contracts\ArticleImportServiceInterface;
 use App\Services\Contracts\ArticleServiceInterface;
 use App\Services\Contracts\BookmarkServiceInterface;
+use App\Services\Contracts\CategoryFollowServiceInterface;
 use App\Services\Contracts\NewsApiClientInterface;
 use App\Services\Contracts\UserRegistrationServiceInterface;
 use App\Services\NewsApiClient;
@@ -44,10 +48,12 @@ class RepositoryServiceProvider extends ServiceProvider
         SourceRepositoryInterface::class => EloquentSourceRepository::class,
         BookmarkRepositoryInterface::class => EloquentBookmarkRepository::class,
         UserRepositoryInterface::class => EloquentUserRepository::class,
+        CategoryFollowRepositoryInterface::class => EloquentCategoryFollowRepository::class,
         ArticleServiceInterface::class => ArticleService::class,
         ArticleImportServiceInterface::class => ArticleImportService::class,
         BookmarkServiceInterface::class => BookmarkService::class,
         UserRegistrationServiceInterface::class => UserRegistrationService::class,
+        CategoryFollowServiceInterface::class => CategoryFollowService::class,
         NewsApiClientInterface::class => NewsApiClient::class,
     ];
 }

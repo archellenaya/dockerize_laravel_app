@@ -1,5 +1,14 @@
 @import 'tailwindcss';
 
+/*
+ * Dark mode is user-toggled (a button, persisted to localStorage), not
+ * OS-preference-only, so it needs to key off a `.dark` class on <html>
+ * rather than Tailwind v4's default `prefers-color-scheme` media query.
+ * See resources/views/layouts/app.blade.php for the toggle + the
+ * before-paint inline script that applies the stored preference.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 

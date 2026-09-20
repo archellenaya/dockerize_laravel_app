@@ -3,11 +3,11 @@
 @section('title', $article->title)
 
 @section('content')
-    <a href="{{ route('articles.index') }}" class="mb-6 inline-flex items-center gap-1 text-sm font-medium text-blue-700 hover:underline">
+    <a href="{{ route('articles.index') }}" class="mb-6 inline-flex items-center gap-1 text-sm font-medium text-blue-700 hover:underline dark:text-blue-400">
         &larr; Back to all articles
     </a>
 
-    <article class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+    <article class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
         @if ($article->image_url)
             <img
                 src="{{ $article->image_url }}"
@@ -20,30 +20,30 @@
         <div class="p-6 sm:p-8">
             <div class="mb-3 flex flex-wrap items-center gap-2 text-xs">
                 @if ($article->category)
-                    <span class="rounded-full bg-blue-100 px-2 py-0.5 font-medium text-blue-800">
+                    <span class="rounded-full bg-blue-100 px-2 py-0.5 font-medium text-blue-800 dark:bg-blue-950 dark:text-blue-300">
                         {{ $article->category->name }}
                     </span>
                 @endif
                 @if ($article->source)
-                    <span class="text-gray-500">{{ $article->source->name }}</span>
+                    <span class="text-gray-500 dark:text-gray-400">{{ $article->source->name }}</span>
                 @endif
             </div>
 
             <div class="mb-3 flex items-start justify-between gap-4">
-                <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl">{{ $article->title }}</h1>
+                <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-100">{{ $article->title }}</h1>
 
                 <div class="shrink-0">
                     @auth
                         @include('articles._bookmark-button', ['article' => $article, 'isBookmarked' => $isBookmarked])
                     @else
-                        <a href="{{ route('login') }}" class="text-xs font-medium text-blue-700 hover:underline">
+                        <a href="{{ route('login') }}" class="text-xs font-medium text-blue-700 hover:underline dark:text-blue-400">
                             Log in to save
                         </a>
                     @endauth
                 </div>
             </div>
 
-            <p class="mb-6 text-sm text-gray-500">
+            <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">
                 @if ($article->author)
                     By {{ $article->author }} &middot;
                 @endif
@@ -52,22 +52,23 @@
                 @else
                     Publication date unknown
                 @endif
+                &middot; {{ $article->reading_time_minutes }} min read
             </p>
 
             @if ($article->description)
-                <p class="mb-4 text-lg text-gray-700">{{ $article->description }}</p>
+                <p class="mb-4 text-lg text-gray-700 dark:text-gray-300">{{ $article->description }}</p>
             @endif
 
             @if ($article->content)
-                <p class="whitespace-pre-line text-base leading-relaxed text-gray-800">{{ $article->content }}</p>
+                <p class="whitespace-pre-line text-base leading-relaxed text-gray-800 dark:text-gray-300">{{ $article->content }}</p>
             @endif
 
-            <div class="mt-8 border-t border-gray-200 pt-6">
+            <div class="mt-8 border-t border-gray-200 pt-6 dark:border-gray-800">
                 <a
                     href="{{ $article->url }}"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="inline-flex items-center gap-1 text-sm font-medium text-blue-700 hover:underline"
+                    class="inline-flex items-center gap-1 text-sm font-medium text-blue-700 hover:underline dark:text-blue-400"
                 >
                     Read the full article at the original source &rarr;
                 </a>

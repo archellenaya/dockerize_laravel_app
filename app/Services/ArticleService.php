@@ -54,4 +54,9 @@ final class ArticleService implements ArticleServiceInterface
     {
         return $this->sources->allWithArticles();
     }
+
+    public function exportable(ArticleFilters $filters, int $limit = 1000): Collection
+    {
+        return $this->articles->allMatching($filters, $limit);
+    }
 }

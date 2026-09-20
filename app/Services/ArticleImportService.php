@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Events\ArticlePublished;
 use App\Exceptions\DuplicateArticleException;
 use App\Repositories\Contracts\ArticleRepositoryInterface;
 use App\Repositories\Contracts\CategoryRepositoryInterface;
@@ -80,7 +81,7 @@ final class ArticleImportService implements ArticleImportServiceInterface
             $seenUrls[$data['url']] = true;
 
             try {
-                $this->articles->create([
+                $article = $this->articles->create([
                     'category_id' => $this->resolveCategoryId($data['category_name'] ?? null),
                     'source_id' => $this->resolveSourceId($data['source_name']),
                     'title' => $data['title'],
@@ -97,6 +98,8 @@ final class ArticleImportService implements ArticleImportServiceInterface
 
                 continue;
             }
+
+            ArticlePublished::dispatch($article);
 
             $created++;
         }

@@ -35,4 +35,13 @@ interface ArticleServiceInterface
      * @return Collection<int, Source>
      */
     public function availableSources(): Collection;
+
+    /**
+     * Articles matching the given filters, for bulk export rather than
+     * paginated display - capped at $limit so a very broad/empty filter
+     * can't try to export an unbounded number of rows.
+     *
+     * @return Collection<int, Article>
+     */
+    public function exportable(ArticleFilters $filters, int $limit = 1000): Collection;
 }
