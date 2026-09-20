@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Support;
 
 use Carbon\Carbon;
@@ -42,9 +44,14 @@ class ArticleSanitizer
         ];
     }
 
-    protected static function text(?string $value, ?int $maxLength = null): ?string
+    /**
+     * @param  mixed  $value  Untrusted external input - not guaranteed to
+     *                        be a string even when the API contract says
+     *                        so, hence the runtime type check.
+     */
+    protected static function text(mixed $value, ?int $maxLength = null): ?string
     {
-        if ($value === null) {
+        if (! is_string($value)) {
             return null;
         }
 
@@ -62,9 +69,12 @@ class ArticleSanitizer
         return $maxLength ? Str::limit($value, $maxLength, '') : $value;
     }
 
-    protected static function url(?string $value): ?string
+    /**
+     * @param  mixed  $value  Untrusted external input - see text().
+     */
+    protected static function url(mixed $value): ?string
     {
-        if ($value === null || trim($value) === '') {
+        if (! is_string($value) || trim($value) === '') {
             return null;
         }
 
@@ -103,9 +113,12 @@ class ArticleSanitizer
         return $normalized;
     }
 
-    protected static function date(?string $value): ?string
+    /**
+     * @param  mixed  $value  Untrusted external input - see text().
+     */
+    protected static function date(mixed $value): ?string
     {
-        if ($value === null || trim($value) === '') {
+        if (! is_string($value) || trim($value) === '') {
             return null;
         }
 

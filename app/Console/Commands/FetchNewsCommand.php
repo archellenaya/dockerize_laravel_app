@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
-use App\Services\ArticleImportService;
-use App\Services\NewsApiClient;
+use App\Exceptions\NewsApiException;
+use App\Services\Contracts\ArticleImportServiceInterface;
+use App\Services\Contracts\NewsApiClientInterface;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use RuntimeException;
 
 class FetchNewsCommand extends Command
 {
@@ -22,7 +24,7 @@ class FetchNewsCommand extends Command
 
     protected $description = 'Fetch recent news articles from configured news sources and categories via NewsAPI';
 
-    public function handle(NewsApiClient $client, ArticleImportService $importer): int
+    public function handle(NewsApiClientInterface $client, ArticleImportServiceInterface $importer): int
     {
         try {
             $sources = $this->parseCsvOption('sources');
@@ -32,15 +34,15 @@ class FetchNewsCommand extends Command
             $to = $this->option('to');
 
             $this->info('Fetching news articles...');
-            $this->info('Sources: ' . ($sources ? implode(', ', $sources) : 'all'));
+            $this->info('Sources: '.($sources ? implode(', ', $sources) : 'all'));
             foreach ($sources as $source) {
-                $this->info('Requested source filter: ' . $source);
+                $this->info('Requested source filter: '.$source);
             }
-            $this->info('Categories: ' . ($categories ? implode(', ', $categories) : 'all'));
+            $this->info('Categories: '.($categories ? implode(', ', $categories) : 'all'));
             foreach ($categories as $category) {
-                $this->info('Requested category filter: ' . $category);
+                $this->info('Requested category filter: '.$category);
             }
-            $this->info('Date range: ' . ($from ?? 'n/a') . ' to ' . ($to ?? 'n/a'));
+            $this->info('Date range: '.($from ?? 'n/a').' to '.($to ?? 'n/a'));
 
             $articles = $client->fetch($sources, $categories, $from, $to, $limit);
 
@@ -90,7 +92,7 @@ class FetchNewsCommand extends Command
             }
 
             return self::SUCCESS;
-        } catch (RuntimeException $exception) {
+        } catch (NewsApiException $exception) {
             $this->error($exception->getMessage());
             Log::error('News fetch failed.', ['message' => $exception->getMessage()]);
 

@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\Article;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
