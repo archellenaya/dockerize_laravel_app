@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Rules;
 
 use Carbon\Carbon;
@@ -15,9 +17,7 @@ use Throwable;
  */
 class NotFutureDate implements ValidationRule
 {
-    public function __construct(protected int $toleranceMinutes = 5)
-    {
-    }
+    public function __construct(protected int $toleranceMinutes = 5) {}
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {

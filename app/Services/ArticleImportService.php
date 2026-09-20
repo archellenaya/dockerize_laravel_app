@@ -1,14 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
-use App\Models\Article;
-use App\Models\Category;
-use App\Models\Source;
+use App\Exceptions\DuplicateArticleException;
+use App\Repositories\Contracts\ArticleRepositoryInterface;
+use App\Repositories\Contracts\CategoryRepositoryInterface;
+use App\Repositories\Contracts\SourceRepositoryInterface;
 use App\Rules\HttpUrl;
 use App\Rules\NotFutureDate;
+use App\Services\Contracts\ArticleImportServiceInterface;
 use App\Support\ArticleSanitizer;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -16,9 +19,22 @@ use Illuminate\Support\Str;
 /**
  * Sanitizes, validates, and persists articles fetched from an external
  * news API, skipping duplicates and invalid records.
+ *
+ * This class owns the business rules of importing an article - what
+ * counts as a duplicate, which fields are required, how a category or
+ * source name maps to a record - and delegates all persistence to the
+ * injected repositories, per the repository pattern. It depends only on
+ * repository interfaces, never on Eloquent models, so it stays testable
+ * and swappable in isolation.
  */
-class ArticleImportService
+final class ArticleImportService implements ArticleImportServiceInterface
 {
+    public function __construct(
+        private readonly ArticleRepositoryInterface $articles,
+        private readonly CategoryRepositoryInterface $categories,
+        private readonly SourceRepositoryInterface $sources,
+    ) {}
+
     /**
      * @param  array<int, array<string, mixed>>  $rawArticles
      * @return array{created: int, duplicates: int, invalid: int, errors: array<int, array{url: mixed, errors: array<int, string>}>}
@@ -41,7 +57,7 @@ class ArticleImportService
                 continue;
             }
 
-            if (isset($seenUrls[$sanitized['url']]) || Article::where('url', $sanitized['url'])->exists()) {
+            if (isset($seenUrls[$sanitized['url']]) || $this->articles->existsByUrl($sanitized['url'])) {
                 $duplicates++;
 
                 continue;
@@ -64,9 +80,9 @@ class ArticleImportService
             $seenUrls[$data['url']] = true;
 
             try {
-                $article = Article::create([
-                    'category_id' => $this->resolveCategory($data['category_name'] ?? null)?->id,
-                    'source_id' => $this->resolveSource($data['source_name'])->id,
+                $this->articles->create([
+                    'category_id' => $this->resolveCategoryId($data['category_name'] ?? null),
+                    'source_id' => $this->resolveSourceId($data['source_name']),
                     'title' => $data['title'],
                     'description' => $data['description'] ?? null,
                     'content' => $data['content'] ?? null,
@@ -75,7 +91,7 @@ class ArticleImportService
                     'image_url' => $data['image_url'] ?? null,
                     'published_at' => $data['published_at'] ?? null,
                 ]);
-            } catch (UniqueConstraintViolationException) {
+            } catch (DuplicateArticleException) {
                 // Lost a race with another process importing the same URL.
                 $duplicates++;
 
@@ -83,7 +99,6 @@ class ArticleImportService
             }
 
             $created++;
-            unset($article);
         }
 
         return compact('created', 'duplicates', 'invalid', 'errors');
@@ -92,7 +107,7 @@ class ArticleImportService
     /**
      * @return array<string, array<int, mixed>>
      */
-    protected function rules(): array
+    private function rules(): array
     {
         return [
             'title' => ['required', 'string', 'max:255'],
@@ -107,25 +122,22 @@ class ArticleImportService
         ];
     }
 
-    protected function resolveCategory(?string $name): ?Category
+    /**
+     * Null means "no usable category name was supplied" - not every
+     * article carries one, and the schema allows that (see
+     * database/migrations/*_create_articles_table.php).
+     */
+    private function resolveCategoryId(?string $name): ?int
     {
-        if (blank($name)) {
+        if (blank($name) || Str::slug($name) === '') {
             return null;
         }
 
-        $slug = Str::slug($name);
-
-        if ($slug === '') {
-            return null;
-        }
-
-        return Category::firstOrCreate(['slug' => $slug], ['name' => Str::title($name)]);
+        return $this->categories->firstOrCreateByName($name)->id;
     }
 
-    protected function resolveSource(string $name): Source
+    private function resolveSourceId(string $name): int
     {
-        $slug = Str::slug($name) ?: 'unknown';
-
-        return Source::firstOrCreate(['slug' => $slug], ['name' => $name ?: 'Unknown']);
+        return $this->sources->firstOrCreateByName($name)->id;
     }
 }

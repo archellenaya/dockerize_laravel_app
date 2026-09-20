@@ -1,15 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
+use App\Exceptions\NewsApiException;
+use App\Services\Contracts\NewsApiClientInterface;
 use Carbon\Carbon;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use RuntimeException;
 
-class NewsApiClient
+/**
+ * Dedicated API communication class for NewsAPI (https://newsapi.org).
+ * Owns request construction, response normalization, and per-request
+ * error handling for the /top-headlines endpoint; nothing else in the
+ * application talks to NewsAPI directly.
+ */
+class NewsApiClient implements NewsApiClientInterface
 {
     protected string $baseUrl;
 
@@ -44,7 +53,7 @@ class NewsApiClient
             $this->lastErrorMessage = 'The NEWSAPI_API_KEY environment variable is not configured.';
             Log::error('NewsAPI configuration missing: NEWSAPI_API_KEY is not set.');
 
-            throw new RuntimeException($this->lastErrorMessage);
+            throw new NewsApiException($this->lastErrorMessage);
         }
 
         $sources = array_values(array_filter(array_map('trim', $sources), fn ($source) => filled($source)));
