@@ -6,6 +6,7 @@ namespace App\Repositories\Contracts;
 
 use App\Exceptions\DuplicateArticleException;
 use App\Models\Article;
+use App\Support\ArticleFilters;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 /**
@@ -18,9 +19,10 @@ interface ArticleRepositoryInterface
 {
     /**
      * Paginate articles newest-first, with their category and source
-     * relations eager-loaded for display.
+     * relations eager-loaded for display, narrowed by any filters that
+     * are set.
      */
-    public function paginateLatest(int $perPage): LengthAwarePaginator;
+    public function paginateLatest(int $perPage, ArticleFilters $filters): LengthAwarePaginator;
 
     /**
      * Whether an article with this exact URL already exists.

@@ -42,11 +42,9 @@ class ArticleControllerTest extends TestCase
     {
         Article::factory()->count(15)->create();
 
-        $response = $this->get('/');
-
-        $response->assertOk();
-        $this->assertCount(12, $response->viewData('articles'));
-        $this->assertSame(15, $response->viewData('articles')->total());
+        $this->get('/')
+            ->assertOk()
+            ->assertSeeTextInOrder(['Showing', '1', 'to', '12', 'of', '15', 'results']);
     }
 
     public function test_article_detail_page_shows_full_content(): void
