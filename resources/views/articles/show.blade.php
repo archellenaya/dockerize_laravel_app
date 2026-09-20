@@ -29,7 +29,19 @@
                 @endif
             </div>
 
-            <h1 class="mb-3 text-2xl font-bold text-gray-900 sm:text-3xl">{{ $article->title }}</h1>
+            <div class="mb-3 flex items-start justify-between gap-4">
+                <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl">{{ $article->title }}</h1>
+
+                <div class="shrink-0">
+                    @auth
+                        @include('articles._bookmark-button', ['article' => $article, 'isBookmarked' => $isBookmarked])
+                    @else
+                        <a href="{{ route('login') }}" class="text-xs font-medium text-blue-700 hover:underline">
+                            Log in to save
+                        </a>
+                    @endauth
+                </div>
+            </div>
 
             <p class="mb-6 text-sm text-gray-500">
                 @if ($article->author)

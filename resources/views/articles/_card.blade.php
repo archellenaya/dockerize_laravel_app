@@ -1,4 +1,4 @@
-@props(['article'])
+@props(['article', 'isBookmarked' => false])
 
 <article class="flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition hover:shadow-md">
     <a href="{{ route('articles.show', $article) }}" class="relative block aspect-video w-full overflow-hidden bg-gray-100">
@@ -30,11 +30,17 @@
             @endif
         </div>
 
-        <h2 class="mb-2 line-clamp-2 text-base font-semibold text-gray-900">
-            <a href="{{ route('articles.show', $article) }}" class="hover:underline">
-                {{ $article->title }}
-            </a>
-        </h2>
+        <div class="mb-2 flex items-start justify-between gap-2">
+            <h2 class="line-clamp-2 text-base font-semibold text-gray-900">
+                <a href="{{ route('articles.show', $article) }}" class="hover:underline">
+                    {{ $article->title }}
+                </a>
+            </h2>
+
+            <div class="shrink-0">
+                @include('articles._bookmark-button', ['article' => $article, 'isBookmarked' => $isBookmarked])
+            </div>
+        </div>
 
         @if ($article->description)
             <p class="mb-3 line-clamp-3 flex-1 text-sm text-gray-600">
