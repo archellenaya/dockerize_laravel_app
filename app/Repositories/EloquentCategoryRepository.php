@@ -6,6 +6,7 @@ namespace App\Repositories;
 
 use App\Models\Category;
 use App\Repositories\Contracts\CategoryRepositoryInterface;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 final class EloquentCategoryRepository implements CategoryRepositoryInterface
@@ -18,5 +19,10 @@ final class EloquentCategoryRepository implements CategoryRepositoryInterface
             ['slug' => $slug],
             ['name' => Str::title($name)],
         );
+    }
+
+    public function allWithArticles(): Collection
+    {
+        return Category::has('articles')->orderBy('name')->get();
     }
 }

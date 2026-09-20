@@ -17,14 +17,14 @@ class ArticleController extends Controller
         private readonly BookmarkServiceInterface $bookmarks,
     ) {}
 
-    public function index(Request $request): View
+    /**
+     * The listing itself is a Livewire component (App\Livewire\ArticleList)
+     * embedded in the view - it fetches and filters its own data, so this
+     * action's only job is to render the page shell around it.
+     */
+    public function index(): View
     {
-        $articles = $this->articles->listLatest();
-
-        return view('articles.index', [
-            'articles' => $articles,
-            'bookmarkedIds' => $this->bookmarkedIdsFor($request, $articles),
-        ]);
+        return view('articles.index');
     }
 
     /**
@@ -41,18 +41,5 @@ class ArticleController extends Controller
             'article' => $article,
             'isBookmarked' => $request->user() && $this->bookmarks->isSaved($request->user()->id, $article),
         ]);
-    }
-
-    /**
-     * @param  iterable<Article>  $articles
-     * @return array<int, int>
-     */
-    private function bookmarkedIdsFor(Request $request, iterable $articles): array
-    {
-        if (! $request->user()) {
-            return [];
-        }
-
-        return $this->bookmarks->filterSavedIds($request->user()->id, $articles);
     }
 }
