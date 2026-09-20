@@ -8,6 +8,7 @@ use App\Exceptions\DuplicateArticleException;
 use App\Models\Article;
 use App\Support\ArticleFilters;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 /**
  * Data access boundary for articles. Business logic (validation,
@@ -23,6 +24,15 @@ interface ArticleRepositoryInterface
      * are set.
      */
     public function paginateLatest(int $perPage, ArticleFilters $filters): LengthAwarePaginator;
+
+    /**
+     * All articles matching the filters, newest-first, capped at
+     * $limit - meant for a bulk export, not paginated display, so there
+     * is no page number, just a hard ceiling to keep memory bounded.
+     *
+     * @return Collection<int, Article>
+     */
+    public function allMatching(ArticleFilters $filters, int $limit): Collection;
 
     /**
      * Whether an article with this exact URL already exists.
